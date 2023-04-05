@@ -44,6 +44,7 @@ INSTALLED_APPS = [
      'userpreference',
     'userincome',
     'crispy_forms',
+    'authentication',
      
 ]
 
