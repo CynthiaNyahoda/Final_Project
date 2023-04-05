@@ -43,7 +43,7 @@ def index(request):
 
 
 
-# @login_required(login_url='/authentication/login')
+@login_required(login_url='/authentication/login')
 def add_expense(request):
     categories = Category.objects.all()
     context = {
@@ -74,7 +74,7 @@ def add_expense(request):
         return redirect('expenses')
 
 
-# @login_required(login_url='/authentication/login')
+@login_required(login_url='/authentication/login')
 def expense_edit(request, id):
     expense = Expense.objects.get(pk=id)
     categories = Category.objects.all()
