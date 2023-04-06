@@ -5,9 +5,15 @@ from django.contrib import messages
 from django.contrib.auth.models import User
 from django.core.paginator import Paginator
 import json
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from userpreference.models import UserPreference
 import datetime
+import csv 
+import xlwt
+import tempfile
+from django.db.models import Sum
+from django.template.loader import render_to_string
+# from weasyprint import HTML
 
 # Create your views here.
 
@@ -147,4 +153,69 @@ def expense_category_summary(request):
 def stats_view(request):
     return render(request, 'expenses/stats.html')
 
+def export_csv(request):
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename=Expenses_{}.csv'.format(datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S'))
 
+    writer = csv.writer(response)
+    writer.writerow(['Amount', 'Description', 'Category', 'Date'])
+
+    expenses = Expense.objects.filter(owner=request.user)
+
+    for expense in expenses:
+        writer.writerow([expense.amount, expense.description, expense.category, expense.date])
+
+    return response
+
+
+
+def export_excel(request):
+    response = HttpResponse(content_type='application/ms-excel')
+    response['Content-Disposition'] = 'attachment; filename=Expenses_{}.xls'.format(datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S'))
+    wb = xlwt.Workbook(encoding='utf-8')
+    ws = wb.add_sheet('Expenses')
+    row_num = 0 
+    font_style = xlwt.XFStyle()
+    font_style.font.bold = True
+    
+    columns= ['Amount', 'Description', 'Category', 'Date']
+    
+    for col_num in range(len(columns)):
+        ws.write(row_num, col_num, columns[col_num], font_style)
+        
+    font_style = xlwt.XFStyle()
+    
+    expenses = Expense.objects.filter(owner=request.user).values_list(
+        'amount', 'description', 'category', 'date')
+    
+    for expense in expenses:
+        row_num += 1
+        for col_num in range(len(expense)):
+            ws.write(row_num, col_num, str(expense[col_num]), font_style)
+    
+    wb.save(response)
+    return response
+
+
+
+# def export_pdf(request):
+#     response = HttpResponse(content_type='application/pdf')
+#     response['Content-Disposition'] = 'inline; attachment; filename=Expenses_{}.pdf'.format(datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S'))
+#     response['Content-Transfer-Encoding'] = 'binary'
+
+#     expenses = Expense.objects.filter(owner=request.user)
+#     total = expenses.aggregate(Sum('amount'))['amount__sum'] or 0
+
+#     html_string = render_to_string('expenses/pdf-output.html', {'expenses': expenses, 'total': total})
+#     html = HTML(string=html_string)
+
+#     result = html.write_pdf()
+
+#     with tempfile.NamedTemporaryFile(delete=True) as output:
+#         output.write(result)
+#         output.flush()
+
+#         output = open(output.name, 'rb')
+#         response.write(output.read())
+
+#     return response
