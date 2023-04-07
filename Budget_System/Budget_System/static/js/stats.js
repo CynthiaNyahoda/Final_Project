@@ -1,12 +1,12 @@
-const renderChart = (data, labels, chartType, chartTitle) => {
-  const ctx = document.getElementById(`${chartType}-chart`).getContext("2d");
-  const chart = new Chart(ctx, {
-    type: chartType,
+const renderChart = (data, labels) => {
+  var ctx = document.getElementById("myChart").getContext("2d");
+  var myChart = new Chart(ctx, {
+    type: "doughnut",
     data: {
       labels: labels,
       datasets: [
         {
-          label: chartTitle,
+          label: "Last 6 months expenses",
           data: data,
           backgroundColor: [
             "rgba(255, 99, 132, 0.2)",
@@ -31,37 +31,26 @@ const renderChart = (data, labels, chartType, chartTitle) => {
     options: {
       title: {
         display: true,
-        text: chartTitle,
+        text: "Expenses per category",
       },
-      legend: {
-        position: 'right',
-        labels: {
-          usePointStyle: true,
-          generateLabels: function(chart) {
-            const data = chart.data;
-            const total = data.datasets[0].data.reduce((acc, val) => acc + val, 0);
-            const labels = data.labels.map((label, index) => {
-              const value = data.datasets[0].data[index];
-              return {
-                text: `${label}: ${value}`,
-                fillStyle: data.datasets[0].backgroundColor[index],
-                strokeStyle: data.datasets[0].borderColor[index],
-                lineWidth: 1,
-                pointStyle: 'circle',
-                index: index
-              };
-            });
-            labels.push({
-              text: `Total Expenses: ${total}`,
-              fillStyle: '#fff',
-              strokeStyle: '#000',
-              lineWidth: 1,
-              pointStyle: 'circle'
-            });
-            return labels;
-          }
-        }
-      }
     },
   });
 };
+
+const getChartData = () => {
+  console.log("fetching");
+  fetch("/expense_category_summary")
+    .then((res) => res.json())
+    .then((results) => {
+      console.log("results", results);
+      const category_data = results.expense_category_data;
+      const [labels, data] = [
+        Object.keys(category_data),
+        Object.values(category_data),
+      ];
+
+      renderChart(data, labels);
+    });
+};
+
+document.onload = getChartData();
