@@ -16,7 +16,7 @@ from django.template.loader import render_to_string
 # from weasyprint import HTML
 
 # Create your views here.
-
+#searching for expenses
 def search_expenses(request):
     if request.method == 'POST':
         search_str = json.loads(request.body).get('searchText')
@@ -129,7 +129,23 @@ def expense_category_summary(request):
     six_months_ago = todays_date-datetime.timedelta(days=30*6)
     expenses = Expense.objects.filter(owner=request.user,
                                       date__gte=six_months_ago, date__lte=todays_date)
+    
+    # Calculate total expenses
+    total_expenses = expenses.aggregate(Sum('amount'))['amount__sum'] or 0
+    
+    # Calculate category-wise expenses
     finalrep = {}
+    for expense in expenses:
+        if expense.category in finalrep:
+            finalrep[expense.category] += expense.amount
+        else:
+            finalrep[expense.category] = expense.amount
+    
+    # Add total expenses to the finalrep dictionary
+    finalrep['Total'] = total_expenses
+    
+    return JsonResponse({'expense_category_data': finalrep})
+
 
     def get_category(expense):
         return expense.category

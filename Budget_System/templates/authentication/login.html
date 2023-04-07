@@ -11,7 +11,7 @@
       src="https://kit.fontawesome.com/64d58efce2.js"
       crossorigin="anonymous"
     ></script>
-    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+    
     <title>Sign in & Sign up Form</title>
   </head>
 
@@ -28,15 +28,14 @@
       <div class="card-body">
         <div class="card-title py-3">
           
-          <h4>Sign In</h4>
+          <h4>Login to your account</h4>
         </div>
         <form action="{% url 'authentication:login' %}" method="post">
           {% csrf_token %}
           {% include 'partials/_messages.html' %}
 
       
-          <div class="input-field">
-            <i class="fas fa-lock"></i>
+          <div class="form-group">
             <input
               type="text"
               name="username"
@@ -46,8 +45,8 @@
               
             />
           </div>
-          <div class="input-field">
-            <i class="fas fa-lock"></i>
+          <div class="form-group">
+           
             <input
               type="password"
               name="password"
@@ -74,4 +73,6 @@
 <script src="{% static 'js/register.js' %}"></script>
 <script src="{% static 'app.js'%}"></script>
   </body>
-</html>
+</html> 
+
+

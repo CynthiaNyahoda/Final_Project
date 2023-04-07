@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'userincome',
     'crispy_forms',
     'authentication',
+    'django_feather',
      
 ]
 
